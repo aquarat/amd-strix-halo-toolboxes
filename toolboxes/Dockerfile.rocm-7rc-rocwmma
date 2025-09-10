@@ -60,9 +60,22 @@ RUN cmake -S . -B build \
           -DCMAKE_BUILD_TYPE=Release \
           -DLLAMA_HIP_UMA=ON \
           -DGGML_HIP_ROCWMMA_FATTN=ON \
+          -DGGML_RPC=ON \
  && cmake --build build --config Release -- -j$(nproc) \
  && cmake --install build --config Release
+ 
+ RUN find build -type f -name 'libggm*.so' -exec cp -v {} /opt/rocm-7.0/lib/ \;
+ RUN cp ./build/bin/rpc-server /usr/local/bin/
 
+#  RUN  echo "Building RPC server" \
+# #  && cd tools \
+# #  && cmake --build build --config Release --target rpc-server -- -j"$(nproc)" \
+#  && echo "Debug" \
+#  && find . \
+#  && find -iname rpc-server . \
+#  && echo "Attempt to copy RPC server" \
+#  && cp -rfv build/tools/rpc/rpc-server /usr/local/bin/
+  
 # keep bin; drop headers/docs/static libs; drop source tree
 RUN find /opt/rocm-7.0 -type f -name '*.a' -delete \
  && rm -rf /opt/rocm-7.0/include /opt/rocm-7.0/share \
